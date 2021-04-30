@@ -6,17 +6,16 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.sql.DataSource;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final DataSource dataSource;
+    private final UserDetailsService myUserDetailService;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -25,13 +24,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .jdbcAuthentication()
-                .dataSource(dataSource) // DB내에서 찾고 싶다면?
-                .usersByUsernameQuery("select username,password,enabled " + "from users " +
-                        "where username = ?")
-                .authoritiesByUsernameQuery("select username,authority " + "from authorities" +
-                        "where username = ?"); // 이렇게 쿼리로 조절해주는 방법도 있음. default value!
+        auth.userDetailsService(myUserDetailService);
     }
 
     @Override
